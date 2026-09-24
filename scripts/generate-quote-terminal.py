@@ -1,4 +1,4 @@
-"""Generate the final terminal SVG using a green version of ertdfgcvb's ASCII Doom Flame.
+"""Generate the animated quote SVG using a green version of ertdfgcvb's ASCII Doom Flame.
 Reference: https://play.ertdfgcvb.xyz/#/src/demos/doom_flame_full_color
 Loops the typing, blinking cursor, and background flames together.
 Requires Pillow. Run: python3 scripts/generate-quote-terminal.py
@@ -71,30 +71,29 @@ from io import BytesIO
 from xml.etree import ElementTree as ET
 
 lines = ['The only thing necessary for the triumph', 'of evil is for good men to do nothing.']
-font = ImageFont.truetype('/System/Library/Fonts/Menlo.ttc',32)
+font = ImageFont.truetype('/System/Library/Fonts/Menlo.ttc',28)
 widths = [font.getlength(line) for line in lines]
 assert max(widths)+78+16 < 862
 count = len(frames)
 images, frame_css = [], []
 for i, frame in enumerate(frames):
     data = BytesIO()
-    frame.save(data, format='PNG', optimize=True)
+    frame.save(data, format='PNG', optimize=True, transparency=0)
     encoded = b64encode(data.getvalue()).decode()
     start, end = i/count*100, (i+1)/count*100
     keys = (f'0%{{visibility:visible}}{end:.5f}%,100%{{visibility:hidden}}' if i == 0 else
             f'0%{{visibility:hidden}}{start:.5f}%{{visibility:visible}}{end:.5f}%{{visibility:hidden}}')
     frame_css.append(f'@keyframes frame{i}{{{keys}}}')
-    images.append(f'<image class="flame-frame frame-{i}" x="0" y="104" width="900" height="240" href="data:image/png;base64,{encoded}" style="animation-name:frame{i}"/>')
+    images.append(f'<image class="flame-frame frame-{i}" x="0" y="0" width="900" height="240" href="data:image/png;base64,{encoded}" style="animation-name:frame{i}"/>')
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="900" height="344" viewBox="0 0 900 344" role="img" aria-labelledby="title description">
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="900" height="240" viewBox="0 0 900 240" role="img" aria-labelledby="title description">
 <title id="title">The only thing necessary for the triumph of evil is for good men to do nothing.</title>
-<desc id="description">A terminal repeatedly types the quote, holding the complete text before each replay. A mint cursor blinks and faded green ASCII flames continue behind it. Footer: Edmond Burke.</desc>
+<desc id="description">The quote types repeatedly, holding the complete text before each replay. A mint cursor blinks and faded green ASCII flames continue behind it. Footer: Edmond Burke.</desc>
 <defs>
-  <clipPath id="card"><rect width="900" height="344" rx="18"/></clipPath>
-  <clipPath id="line-one"><rect class="reveal-one" x="78" y="111" width="{widths[0]+2}" height="43"/></clipPath>
-  <clipPath id="line-two"><rect class="reveal-two" x="78" y="161" width="{widths[1]+2}" height="43"/></clipPath>
+  <clipPath id="line-one"><rect class="reveal-one" x="78" y="47" width="{widths[0]+2}" height="43"/></clipPath>
+  <clipPath id="line-two"><rect class="reveal-two" x="78" y="91" width="{widths[1]+2}" height="43"/></clipPath>
   <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="white" stop-opacity=".07"/><stop offset="1" stop-color="white" stop-opacity=".165"/></linearGradient>
-  <mask id="flame-opacity"><rect y="104" width="900" height="240" fill="url(#fade)"/></mask>
+  <mask id="flame-opacity"><rect y="0" width="900" height="240" fill="url(#fade)"/></mask>
 </defs>
 <style>
 text{{font-family:Menlo,Consolas,monospace}}
@@ -116,20 +115,13 @@ text{{font-family:Menlo,Consolas,monospace}}
 @keyframes blink{{0%,100%{{opacity:1}}58%{{opacity:0}}}}
 @media(prefers-reduced-motion:reduce){{.flame-frame,.reveal-one,.reveal-two,.cursor-one,.cursor-two,.move-one,.move-two,.blink{{animation:none!important}}.flame-frame{{visibility:hidden}}.frame-0{{visibility:visible}}.cursor-one,.cursor-two{{display:none}}}}
 </style>
-<g clip-path="url(#card)">
-<rect width="900" height="344" fill="#10151e"/>
 <g mask="url(#flame-opacity)">{''.join(images)}</g>
-<path d="M0 56H900" stroke="#263041"/>
-<circle cx="36" cy="29" r="5" fill="#ff7979"/><circle cx="54" cy="29" r="5" fill="#f3c96a"/><circle cx="72" cy="29" r="5" fill="#8bd5a3"/>
-<text x="450" y="33" text-anchor="middle" font-size="11" fill="#7e8da5">~/mavisakalyan</text>
-<path d="m41 126 8 10-8 10" fill="none" stroke="#85d9b2" stroke-width="4"/>
-<text textLength="{widths[0]}" lengthAdjust="spacingAndGlyphs" clip-path="url(#line-one)" x="78" y="144" font-size="32" fill="#e4edf8">{lines[0]}</text>
-<text textLength="{widths[1]}" lengthAdjust="spacingAndGlyphs" clip-path="url(#line-two)" x="78" y="194" font-size="32" fill="#e4edf8">{lines[1]}</text>
-<g class="cursor-one"><g class="move-one"><rect class="blink" x="82" y="121" width="12" height="31" fill="#85d9b2"/></g></g>
-<g class="cursor-two"><g class="move-two"><rect class="blink" x="82" y="171" width="12" height="31" fill="#85d9b2"/></g></g>
-<text x="39" y="311" font-size="11" fill="#62758f">Edmond Burke</text>
-</g>
-<rect x=".5" y=".5" width="899" height="343" rx="18" fill="none" stroke="#30363d"/>
+<path d="m41 58 8 9-8 9" fill="none" stroke="#85d9b2" stroke-width="4"/>
+<text textLength="{widths[0]}" lengthAdjust="spacingAndGlyphs" clip-path="url(#line-one)" x="78" y="80" font-size="28" fill="#e4edf8">{lines[0]}</text>
+<text textLength="{widths[1]}" lengthAdjust="spacingAndGlyphs" clip-path="url(#line-two)" x="78" y="124" font-size="28" fill="#e4edf8">{lines[1]}</text>
+<g class="cursor-one"><g class="move-one"><rect class="blink" x="82" y="57" width="11" height="27" fill="#85d9b2"/></g></g>
+<g class="cursor-two"><g class="move-two"><rect class="blink" x="82" y="101" width="11" height="27" fill="#85d9b2"/></g></g>
+<text x="44" y="215" font-size="14" fill="#96a5ba">Edmond Burke</text>
 </svg>'''
 ET.fromstring(svg)
 output=ROOT/'assets/quote-terminal.svg'
